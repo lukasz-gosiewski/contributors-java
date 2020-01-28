@@ -18,6 +18,7 @@ dependencies {
 
     compile 'javax.inject:javax.inject:1'
     compile 'io.vavr:vavr:0.10.2'
+    compile 'io.vavr:vavr-jackson:0.10.2'
 
     compileOnly 'org.projectlombok:lombok:1.18.10'
 

@@ -4,13 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gosiewski.contributorsjava.dto.incoming.RepositoryRequestDto;
 import com.gosiewski.contributorsjava.error.ApiCallError;
-import com.gosiewski.contributorsjava.error.Error;
 import com.gosiewski.contributorsjava.error.IllegalArgumentError;
 import com.gosiewski.contributorsjava.error.NotFoundError;
 import com.gosiewski.contributorsjava.service.domain.Repository;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,10 +53,10 @@ class RepositoriesFetchingTest {
     @Test
     void shouldReturnErrorWhenNameBlank() {
         // given
-        final String organizationName = "   ";
+        final var organizationName = "   ";
 
         // when
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsLeftInstanceOf(IllegalArgumentError.class);
@@ -67,14 +65,14 @@ class RepositoriesFetchingTest {
     @Test
     void shouldFetchOrganizationRepos() throws URISyntaxException, JsonProcessingException {
         // given
-        final String organizationName = "exampleName";
-        final Seq<Repository> expectedResult = List.of(
+        final var organizationName = "exampleName";
+        final var expectedResult = List.of(
                 new Repository("sampleRepository1"),
                 new Repository("sampleRepository2")
         );
-        final Seq<RepositoryRequestDto> response = expectedResult
+        final var response = expectedResult
                 .map(repository -> new RepositoryRequestDto(repository.getName()));
-        final String url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
+        final var url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -85,7 +83,7 @@ class RepositoriesFetchingTest {
                         .body(mapper.writeValueAsString(response.toJavaList()))
                 );
 
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsOnRight(expectedResult);
@@ -94,20 +92,20 @@ class RepositoriesFetchingTest {
     @Test
     void shouldFetchAllPages() throws URISyntaxException, JsonProcessingException {
         // given
-        final String organizationName = "exampleName";
-        final Seq<Repository> expectedResult = List.of(
+        final var organizationName = "exampleName";
+        final var expectedResult = List.of(
                 new Repository("sampleRepository1"),
                 new Repository("sampleRepository2"),
                 new Repository("sampleRepository3"),
                 new Repository("sampleRepository4"),
                 new Repository("sampleRepository5")
         );
-        final Seq<RepositoryRequestDto> response = expectedResult
+        final var response = expectedResult
                 .map(repository -> new RepositoryRequestDto(repository.getName()));
-        final String firstPageUrl = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);;
-        final String secondPageUrl = String.format("https://api.github.com/orgs/%1$s/repos?page=2",
+        final var firstPageUrl = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);;
+        final var secondPageUrl = String.format("https://api.github.com/orgs/%1$s/repos?page=2",
                 organizationName);;
-        final HttpHeaders firstPageHeaders = new HttpHeaders();
+        final var firstPageHeaders = new HttpHeaders();
         firstPageHeaders.add("Link",
                 "<" + secondPageUrl + ">; rel=\"next\",\n" +
                         "<https://api.github.com/resource?page=3>; rel=\"last\"");
@@ -132,7 +130,7 @@ class RepositoriesFetchingTest {
                         .body(mapper.writeValueAsString(response.subSequence(2).toJavaList()))
                 );
 
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsOnRight(expectedResult);
@@ -141,10 +139,10 @@ class RepositoriesFetchingTest {
     @Test
     void shouldFetchEmptyResult() throws URISyntaxException, JsonProcessingException {
         // given
-        final String organizationName = "exampleName";
+        final var organizationName = "exampleName";
         final Seq<Repository> expectedResult = List.empty();
         final Seq<RepositoryRequestDto> response = List.empty();
-        final String url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
+        final var url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -155,7 +153,7 @@ class RepositoriesFetchingTest {
                         .body(mapper.writeValueAsString(response.toJavaList()))
                 );
 
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsOnRight(expectedResult);
@@ -164,8 +162,8 @@ class RepositoriesFetchingTest {
     @Test
     void shouldForwardNotFound() throws URISyntaxException {
         // given
-        final String organizationName = "nonExistingOrgName";
-        final String url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
+        final var organizationName = "nonExistingOrgName";
+        final var url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -175,7 +173,7 @@ class RepositoriesFetchingTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 );
 
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsLeftInstanceOf(NotFoundError.class);
@@ -184,8 +182,8 @@ class RepositoriesFetchingTest {
     @Test
     void shouldReturnErrorWhenResponseCodeUnexpected() throws URISyntaxException {
         // given
-        final String organizationName = "nonExistingOrgName";
-        final String url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
+        final var organizationName = "nonExistingOrgName";
+        final var url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -195,7 +193,7 @@ class RepositoriesFetchingTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 );
 
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsLeftInstanceOf(ApiCallError.class);
@@ -204,8 +202,8 @@ class RepositoriesFetchingTest {
     @Test
     void shouldReturnErrorWhenResponseBodyDifferent() throws URISyntaxException {
         // given
-        final String organizationName = "nonExistingOrgName";
-        final String url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
+        final var organizationName = "nonExistingOrgName";
+        final var url = String.format("https://api.github.com/orgs/%1$s/repos", organizationName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -216,7 +214,7 @@ class RepositoriesFetchingTest {
                         .body("Unexpected body")
                 );
 
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos(organizationName);
+        final var result = service.getOrganizationRepos(organizationName);
 
         // then
         assertThat(result).containsLeftInstanceOf(ApiCallError.class);

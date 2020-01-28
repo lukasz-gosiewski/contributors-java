@@ -13,10 +13,7 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +30,7 @@ public class GitHubAPIService {
             return Either.left(new IllegalArgumentError("Organization name cannot be blank."));
         }
 
-        final String url = String.format(REPOS_URL, organizationName);
+        final var url = String.format(REPOS_URL, organizationName);
 
         return getFullGitHubResource(url, RepositoryRequestDto.class).map(this::mapRepositoryDtos);
     }
@@ -44,19 +41,24 @@ public class GitHubAPIService {
             return Either.left(new IllegalArgumentError("Owner name or repo name cannot be blank."));
         }
 
-        final String url = String.format(CONTRIBUTORS_URL, ownerName, repoName);
+        final var url = String.format(CONTRIBUTORS_URL, ownerName, repoName);
 
         return getFullGitHubResource(url, ContributorRequestDto.class).map(this::mapContributorDtos);
     }
 
     private <T> Either<Error, Seq<T>> getFullGitHubResource(final String url, final Class<T> clazz) {
-        Either<Error, ResponseEntity<java.util.List<T>>> result = httpClient.fetchFirstPage(url, clazz);
+        return fetchMore(List.empty(), url, clazz);
+    }
 
-        if (result.isLeft()) {
-            return Either.left(result.getLeft());
+    private <T> Either<Error, Seq<T>> fetchMore(final List<T> acc, final String url,
+                                                final Class<T> clazz) {
+        var nextPageResult = httpClient.fetchPage(url, clazz);
+
+        if (nextPageResult.isLeft()) {
+            return Either.left(nextPageResult.getLeft());
         }
 
-        ResponseEntity<java.util.List<T>> response = result.get();
+        final var response = nextPageResult.get();
 
         if (response.getBody() == null) {
             logEmptyBodyError(response.toString());
@@ -64,27 +66,12 @@ public class GitHubAPIService {
             return Either.left(new ApiCallError());
         }
 
-        final java.util.List<T> fullResult = new ArrayList<>(response.getBody());
-
-        while(httpClient.hasNextPage(response.getHeaders())) {
-            result = httpClient.fetchNextPage(response, clazz);
-
-            if (result.isLeft()) {
-                return Either.left(result.getLeft());
-            }
-
-            response = result.get();
-
-            if (response.getBody() == null) {
-                logEmptyBodyError(response.toString());
-
-                return Either.left(new ApiCallError());
-            }
-
-            fullResult.addAll(response.getBody());
+        final var nextPageUrl = httpClient.getNextPageLink(response.getHeaders());
+        if (!nextPageUrl.isEmpty()) {
+            return fetchMore(acc.appendAll(response.getBody()), nextPageUrl.get(), clazz);
+        } else {
+            return Either.right(acc.appendAll(response.getBody()));
         }
-
-        return Either.right(List.ofAll(fullResult));
     }
 
     private Seq<Contributor> mapContributorDtos(final Seq<ContributorRequestDto> dtos) {

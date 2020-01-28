@@ -1,11 +1,6 @@
 package com.gosiewski.contributorsjava.service;
 
 
-import com.gosiewski.contributorsjava.error.Error;
-import com.gosiewski.contributorsjava.service.domain.Contributor;
-import com.gosiewski.contributorsjava.service.domain.Repository;
-import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import org.assertj.vavr.api.VavrAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +26,7 @@ public class ManualTests {
 
     @Test
     void shouldReturnOrganizationReposWhenNoPagination() {
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos("dook");
+        final var result = service.getOrganizationRepos("dook");
 
         VavrAssertions.assertThat(result).isRight();
         assertThat(result.get()).isNotNull();
@@ -40,7 +35,7 @@ public class ManualTests {
 
     @Test
     void shouldReturnOrganizationReposWithPagination() {
-        final Either<Error, Seq<Repository>> result = service.getOrganizationRepos("intive");
+        final var result = service.getOrganizationRepos("intive");
 
         VavrAssertions.assertThat(result).isRight();
         assertThat(result.get()).isNotNull();
@@ -49,7 +44,7 @@ public class ManualTests {
 
     @Test
     void shouldReturnRepoContributorsWhenNoPagination() {
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors("dook", "internal-tools");
+        final var result = service.getRepoContributors("dook", "internal-tools");
 
         VavrAssertions.assertThat(result).isRight();
         assertThat(result.get()).isNotNull();
@@ -58,7 +53,7 @@ public class ManualTests {
 
     @Test
     void shouldReturnRepoContributorsWithPagination() {
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors("typelevel", "cats");
+        final var result = service.getRepoContributors("typelevel", "cats");
 
         VavrAssertions.assertThat(result).isRight();
         assertThat(result.get()).isNotNull();

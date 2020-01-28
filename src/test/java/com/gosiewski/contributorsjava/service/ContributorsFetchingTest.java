@@ -4,13 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gosiewski.contributorsjava.dto.incoming.ContributorRequestDto;
 import com.gosiewski.contributorsjava.error.ApiCallError;
-import com.gosiewski.contributorsjava.error.Error;
 import com.gosiewski.contributorsjava.error.IllegalArgumentError;
 import com.gosiewski.contributorsjava.error.NotFoundError;
 import com.gosiewski.contributorsjava.service.domain.Contributor;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
-import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,11 +52,11 @@ public class ContributorsFetchingTest {
     @Test
     void shouldReturnErrorWhenOwnerNameBlank() {
         //given
-        final String ownerName = "      ";
-        final String repoName = "repositoryName";
+        final var ownerName = "      ";
+        final var repoName = "repositoryName";
 
         // when
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsLeftInstanceOf(IllegalArgumentError.class);
@@ -67,11 +65,11 @@ public class ContributorsFetchingTest {
     @Test
     void shouldReturnErrorWhenRepoNameBlank() {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "       ";
+        final var ownerName = "ownerName";
+        final var repoName = "       ";
 
         // when
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsLeftInstanceOf(IllegalArgumentError.class);
@@ -80,18 +78,17 @@ public class ContributorsFetchingTest {
     @Test
     void shouldFetchRepoContributors() throws URISyntaxException, JsonProcessingException {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "repoName";
-        final Seq<Contributor> expectedResult = List.of(
+        final var ownerName = "ownerName";
+        final var repoName = "repoName";
+        final var expectedResult = List.of(
                 new Contributor("sampleLogin", 5),
                 new Contributor("sampleLogin", 12),
                 new Contributor("sampleLogin", 123)
         );
-        final Seq<ContributorRequestDto> response = expectedResult
+        final var response = expectedResult
                 .map(contributor -> new ContributorRequestDto(contributor.getLogin(),
                         contributor.getContributionsAmount()));
-        final String url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
-                repoName);
+        final var url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName, repoName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -102,7 +99,7 @@ public class ContributorsFetchingTest {
                         .body(mapper.writeValueAsString(response.toJavaList()))
                 );
 
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsOnRight(expectedResult);
@@ -111,26 +108,26 @@ public class ContributorsFetchingTest {
     @Test
     void shouldFetchAllPages() throws URISyntaxException, JsonProcessingException {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "repoName";
-        final Seq<Contributor> expectedResult = List.of(
+        final var ownerName = "ownerName";
+        final var repoName = "repoName";
+        final var expectedResult = List.of(
                 new Contributor("sampleLogin", 5),
                 new Contributor("sampleLogin", 12),
                 new Contributor("sampleLogin", 123),
                 new Contributor("sampleLogin", 0),
                 new Contributor("sampleLogin", 3)
         );
-        final Seq<ContributorRequestDto> response = expectedResult
+        final var response = expectedResult
                 .map(contributor -> new ContributorRequestDto(contributor.getLogin(),
                         contributor.getContributionsAmount()));
-        final String firstPageUrl = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
+        final var firstPageUrl = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
                 repoName);
-        final String secondPageUrl = String.format("https://api.github.com/repos/%1$s/%2$s/contributors?page=2",
-                ownerName, repoName);;
-        final HttpHeaders firstPageHeaders = new HttpHeaders();
+        final var secondPageUrl = String.format("https://api.github.com/repos/%1$s/%2$s/contributors?page=2", ownerName,
+                repoName);;
+        final var firstPageHeaders = new HttpHeaders();
         firstPageHeaders.add("Link",
                 "<" + secondPageUrl + ">; rel=\"next\",\n" +
-                        "<https://api.github.com/resource?page=3>; rel=\"last\"");
+                "<https://api.github.com/resource?page=3>; rel=\"last\"");
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -150,7 +147,7 @@ public class ContributorsFetchingTest {
                         .body(mapper.writeValueAsString(response.subSequence(2).toJavaList()))
                 );
 
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsOnRight(expectedResult);
@@ -159,11 +156,11 @@ public class ContributorsFetchingTest {
     @Test
     void shouldFetchEmptyResult() throws URISyntaxException, JsonProcessingException {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "repoName";
+        final var ownerName = "ownerName";
+        final var repoName = "repoName";
         final Seq<Contributor> expectedResult = List.empty();
         final Seq<ContributorRequestDto> response = List.empty();
-        final String url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
+        final var url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
                 repoName);
 
         // when
@@ -175,7 +172,7 @@ public class ContributorsFetchingTest {
                         .body(mapper.writeValueAsString(response.toJavaList()))
                 );
 
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsOnRight(expectedResult);
@@ -184,10 +181,9 @@ public class ContributorsFetchingTest {
     @Test
     void shouldForwardNotFound() throws URISyntaxException {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "repoName";
-        final String url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
-                repoName);
+        final var ownerName = "ownerName";
+        final var repoName = "repoName";
+        final var url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName, repoName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -197,7 +193,7 @@ public class ContributorsFetchingTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 );
 
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsLeftInstanceOf(NotFoundError.class);
@@ -206,10 +202,9 @@ public class ContributorsFetchingTest {
     @Test
     void shouldReturnErrorWhenResponseCodeUnexpected() throws URISyntaxException {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "repoName";
-        final String url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
-                repoName);
+        final var ownerName = "ownerName";
+        final var repoName = "repoName";
+        final var url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName, repoName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -219,7 +214,7 @@ public class ContributorsFetchingTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 );
 
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsLeftInstanceOf(ApiCallError.class);
@@ -228,10 +223,9 @@ public class ContributorsFetchingTest {
     @Test
     void shouldReturnErrorWhenResponseBodyDifferent() throws URISyntaxException {
         //given
-        final String ownerName = "ownerName";
-        final String repoName = "repoName";
-        final String url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName,
-                repoName);
+        final var ownerName = "ownerName";
+        final var repoName = "repoName";
+        final var url = String.format("https://api.github.com/repos/%1$s/%2$s/contributors", ownerName, repoName);
 
         // when
         mockServer.expect(ExpectedCount.once(),
@@ -242,7 +236,7 @@ public class ContributorsFetchingTest {
                         .body("Unexpected body")
                 );
 
-        final Either<Error, Seq<Contributor>> result = service.getRepoContributors(ownerName, repoName);
+        final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
         assertThat(result).containsLeftInstanceOf(ApiCallError.class);
