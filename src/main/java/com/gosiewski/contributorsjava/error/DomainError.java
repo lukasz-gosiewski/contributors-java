@@ -5,6 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public abstract class Error {
+public abstract class DomainError {
     private final String reason;
 }

@@ -3,7 +3,7 @@ package com.gosiewski.contributorsjava.service;
 import com.gosiewski.contributorsjava.dto.incoming.ContributorRequestDto;
 import com.gosiewski.contributorsjava.dto.incoming.RepositoryRequestDto;
 import com.gosiewski.contributorsjava.error.ApiCallError;
-import com.gosiewski.contributorsjava.error.Error;
+import com.gosiewski.contributorsjava.error.DomainError;
 import com.gosiewski.contributorsjava.error.IllegalArgumentError;
 import com.gosiewski.contributorsjava.service.domain.Contributor;
 import com.gosiewski.contributorsjava.service.domain.Repository;
@@ -25,7 +25,7 @@ public class GitHubAPIService {
 
     private final HttpClient httpClient;
 
-    final Either<Error, Seq<Repository>> getOrganizationRepos(final String organizationName) {
+    final Either<DomainError, Seq<Repository>> getOrganizationRepos(final String organizationName) {
         if (organizationName.isBlank()) {
             return Either.left(new IllegalArgumentError("Organization name cannot be blank."));
         }
@@ -35,8 +35,8 @@ public class GitHubAPIService {
         return getFullGitHubResource(url, RepositoryRequestDto.class).map(this::mapRepositoryDtos);
     }
 
-    final Either<Error, Seq<Contributor>> getRepoContributors(final String ownerName,
-                                                              final String repoName) {
+    final Either<DomainError, Seq<Contributor>> getRepoContributors(final String ownerName,
+                                                                    final String repoName) {
         if (ownerName.isBlank() || repoName.isBlank()) {
             return Either.left(new IllegalArgumentError("Owner name or repo name cannot be blank."));
         }
@@ -46,12 +46,12 @@ public class GitHubAPIService {
         return getFullGitHubResource(url, ContributorRequestDto.class).map(this::mapContributorDtos);
     }
 
-    private <T> Either<Error, Seq<T>> getFullGitHubResource(final String url, final Class<T> clazz) {
+    private <T> Either<DomainError, Seq<T>> getFullGitHubResource(final String url, final Class<T> clazz) {
         return fetchMore(List.empty(), url, clazz);
     }
 
-    private <T> Either<Error, Seq<T>> fetchMore(final List<T> acc, final String url,
-                                                final Class<T> clazz) {
+    private <T> Either<DomainError, Seq<T>> fetchMore(final List<T> acc, final String url,
+                                                      final Class<T> clazz) {
         var nextPageResult = httpClient.fetchPage(url, clazz);
 
         if (nextPageResult.isLeft()) {
