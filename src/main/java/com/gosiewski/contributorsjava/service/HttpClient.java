@@ -1,7 +1,7 @@
 package com.gosiewski.contributorsjava.service;
 
 import com.gosiewski.contributorsjava.error.ApiCallError;
-import com.gosiewski.contributorsjava.error.Error;
+import com.gosiewski.contributorsjava.error.DomainError;
 import com.gosiewski.contributorsjava.error.NotFoundError;
 import io.vavr.collection.List;
 import io.vavr.control.Either;
@@ -45,7 +45,7 @@ public class HttpClient {
     @Inject
     private final RestTemplate restTemplate;
 
-    public final <T> Either<Error, ResponseEntity<List<T>>> fetchPage(final String url, final Class<T> clazz) {
+    public final <T> Either<DomainError, ResponseEntity<List<T>>> fetchPage(final String url, final Class<T> clazz) {
         try {
             // Add header to accept only particular API version responses
             final var headers = new HttpHeaders();

@@ -1,6 +1,6 @@
 package com.gosiewski.contributorsjava.error;
 
-public final class NotFoundError extends Error {
+public final class NotFoundError extends DomainError {
     public NotFoundError() {
         super("Not found");
     }
