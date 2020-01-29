@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gosiewski.contributorsjava.dto.incoming.ContributorRequestDto;
 import com.gosiewski.contributorsjava.error.ApiCallError;
-import com.gosiewski.contributorsjava.error.IllegalArgumentError;
 import com.gosiewski.contributorsjava.error.NotFoundError;
 import com.gosiewski.contributorsjava.service.domain.Contributor;
 import io.vavr.collection.List;
@@ -36,7 +35,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class ContributorsFetchingTest {
 
     @Inject
-    private GitHubAPIService service;
+    private GitHubApiService service;
 
     @Inject
     private RestTemplate restTemplate;
@@ -59,7 +58,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsLeftInstanceOf(IllegalArgumentError.class);
+        assertThat(result.get()).containsLeftInstanceOf(ApiCallError.class);
     }
 
     @Test
@@ -72,7 +71,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsLeftInstanceOf(IllegalArgumentError.class);
+        assertThat(result.get()).containsLeftInstanceOf(ApiCallError.class);
     }
 
     @Test
@@ -102,7 +101,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsOnRight(expectedResult);
+        assertThat(result.get()).containsOnRight(expectedResult);
     }
 
     @Test
@@ -150,7 +149,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsOnRight(expectedResult);
+        assertThat(result.get()).containsOnRight(expectedResult);
     }
 
     @Test
@@ -175,7 +174,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsOnRight(expectedResult);
+        assertThat(result.get()).containsOnRight(expectedResult);
     }
 
     @Test
@@ -196,7 +195,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsLeftInstanceOf(NotFoundError.class);
+        assertThat(result.get()).containsLeftInstanceOf(NotFoundError.class);
     }
 
     @Test
@@ -217,7 +216,7 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsLeftInstanceOf(ApiCallError.class);
+        assertThat(result.get()).containsLeftInstanceOf(ApiCallError.class);
     }
 
     @Test
@@ -239,6 +238,6 @@ public class ContributorsFetchingTest {
         final var result = service.getRepoContributors(ownerName, repoName);
 
         // then
-        assertThat(result).containsLeftInstanceOf(ApiCallError.class);
+        assertThat(result.get()).containsLeftInstanceOf(ApiCallError.class);
     }
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gosiewski.contributorsjava.dto.incoming.RepositoryRequestDto;
 import com.gosiewski.contributorsjava.error.ApiCallError;
-import com.gosiewski.contributorsjava.error.IllegalArgumentError;
+import com.gosiewski.contributorsjava.error.BlankOrganisationNameError;
 import com.gosiewski.contributorsjava.error.NotFoundError;
 import com.gosiewski.contributorsjava.service.domain.Repository;
 import io.vavr.collection.List;
@@ -37,7 +37,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class RepositoriesFetchingTest {
 
     @Inject
-    private GitHubAPIService service;
+    private GitHubApiService service;
 
     @Inject
     private RestTemplate restTemplate;
@@ -59,7 +59,7 @@ class RepositoriesFetchingTest {
         final var result = service.getOrganizationRepos(organizationName);
 
         // then
-        assertThat(result).containsLeftInstanceOf(IllegalArgumentError.class);
+        assertThat(result).containsLeftInstanceOf(BlankOrganisationNameError.class);
     }
 
     @Test

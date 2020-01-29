@@ -7,6 +7,7 @@ import com.gosiewski.contributorsjava.service.domain.Contributor;
 import com.gosiewski.contributorsjava.service.domain.Repository;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
+import io.vavr.concurrent.Future;
 import io.vavr.control.Either;
 import org.assertj.vavr.api.VavrAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +20,14 @@ import static org.mockito.Mockito.when;
 
 public class OrganizationContributorsFetchingTest {
 
-    private ContributorsService service;
+    private ContributorService service;
 
-    private GitHubAPIService mockedGitHubAPIService;
+    private GitHubApiService mockedGitHubAPIService;
 
     @BeforeEach
     void beforeEach() {
-        this.mockedGitHubAPIService = mock(GitHubAPIService.class);
-        this.service = new ContributorsService(mockedGitHubAPIService);
+        this.mockedGitHubAPIService = mock(GitHubApiService.class);
+        this.service = new ContributorService(mockedGitHubAPIService);
     }
 
     @Test
@@ -41,16 +42,16 @@ public class OrganizationContributorsFetchingTest {
                 new Repository(repositoryName2),
                 new Repository(repositoryName3)
         ));
-        final Either<DomainError, Seq<Contributor>> repoContributors1 = Either.right(List.of(
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors1 = Future.successful(Either.right(List.of(
                 new Contributor("exampleContributor1", 45),
                 new Contributor("exampleContributor2", 12),
                 new Contributor("exampleContributor3", 1)
-        ));
-        final Either<DomainError, Seq<Contributor>> repoContributors2 = Either.right(List.of(
+        )));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors2 = Future.successful(Either.right(List.of(
                 new Contributor("exampleContributor4", 0),
                 new Contributor("exampleContributor5", 80)
-        ));
-        final Either<DomainError, Seq<Contributor>> repoContributors3 = Either.right(List.empty());
+        )));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors3 = Future.successful(Either.right(List.empty()));
         final var expectedResult = List.of(
                 new ContributorDto("exampleContributor1", 45),
                 new ContributorDto("exampleContributor2", 12),
@@ -89,9 +90,9 @@ public class OrganizationContributorsFetchingTest {
                 new Repository(repositoryName2),
                 new Repository(repositoryName3)
         ));
-        final Either<DomainError, Seq<Contributor>> repoContributors1 = Either.right(List.empty());
-        final Either<DomainError, Seq<Contributor>> repoContributors2 = Either.right(List.empty());
-        final Either<DomainError, Seq<Contributor>> repoContributors3 = Either.right(List.empty());
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors1 = Future.successful(Either.right(List.empty()));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors2 = Future.successful(Either.right(List.empty()));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors3 = Future.successful(Either.right(List.empty()));
         final Seq<ContributorDto> expectedResult = List.empty();
 
 
@@ -142,16 +143,16 @@ public class OrganizationContributorsFetchingTest {
                 new Repository(repositoryName2),
                 new Repository(repositoryName3)
         ));
-        final Either<DomainError, Seq<Contributor>> repoContributors1 = Either.right(List.of(
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors1 = Future.successful(Either.right(List.of(
                 new Contributor("exampleContributor2", 45),
                 new Contributor("exampleContributor2", 12),
                 new Contributor("exampleContributor3", 1)
-        ));
-        final Either<DomainError, Seq<Contributor>> repoContributors2 = Either.right(List.of(
+        )));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors2 = Future.successful(Either.right(List.of(
                 new Contributor("exampleContributor4", 0),
                 new Contributor("exampleContributor2", 80)
-        ));
-        final Either<DomainError, Seq<Contributor>> repoContributors3 = Either.right(List.empty());
+        )));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors3 = Future.successful(Either.right(List.empty()));
         final var expectedResult = List.of(
                 new ContributorDto("exampleContributor2", 137),
                 new ContributorDto("exampleContributor3", 1),
@@ -188,16 +189,16 @@ public class OrganizationContributorsFetchingTest {
                 new Repository(repositoryName2),
                 new Repository(repositoryName3)
         ));
-        final Either<DomainError, Seq<Contributor>> repoContributors1 = Either.right(List.of(
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors1 = Future.successful(Either.right(List.of(
                 new Contributor("exampleContributor1", 45),
                 new Contributor("exampleContributor2", 12),
                 new Contributor("exampleContributor3", 1)
-        ));
-        final Either<DomainError, Seq<Contributor>> repoContributors2 = Either.right(List.of(
+        )));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors2 = Future.successful(Either.right(List.of(
                 new Contributor("exampleContributor4", 0),
                 new Contributor("exampleContributor5", 80)
-        ));
-        final Either<DomainError, Seq<Contributor>> repoContributors3 = Either.right(List.empty());
+        )));
+        final Future<Either<DomainError, Seq<Contributor>>> repoContributors3 = Future.successful(Either.right(List.empty()));
         final var expectedResult = List.of(
                 new ContributorDto("exampleContributor5", 80),
                 new ContributorDto("exampleContributor1", 45),
@@ -252,7 +253,7 @@ public class OrganizationContributorsFetchingTest {
         when(mockedGitHubAPIService.getOrganizationRepos(organizationName))
                 .thenReturn(organizationRepos);
         when(mockedGitHubAPIService.getRepoContributors(any(), any()))
-                .thenReturn(Either.left(new ApiCallError()));
+                .thenReturn(Future.successful(Either.left(new ApiCallError())));
 
         final var result = service.getContributorsByOrganization(organizationName);
 

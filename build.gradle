@@ -28,7 +28,9 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
 
-    testCompile 'org.assertj:assertj-core:3.11.1'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
+    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.2.4'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
 }
 
 test {
