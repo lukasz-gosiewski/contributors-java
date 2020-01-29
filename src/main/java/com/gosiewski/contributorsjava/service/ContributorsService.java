@@ -3,6 +3,7 @@ package com.gosiewski.contributorsjava.service;
 import com.gosiewski.contributorsjava.dto.outgoing.ContributorDto;
 import com.gosiewski.contributorsjava.error.DomainError;
 import com.gosiewski.contributorsjava.service.domain.Contributor;
+import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,10 @@ public class ContributorsService {
 
     public Either<DomainError, Seq<ContributorDto>> getContributorsByOrganization(final String organizationName) {
         return gitHubAPIService.getOrganizationRepos(organizationName)
-                .map(repositories -> repositories
+                .map(repositories -> List.ofAll(repositories
+                        .toJavaParallelStream()
                         .map(repository -> gitHubAPIService.getRepoContributors(organizationName, repository.getName())))
+                )
                 .flatMap(Either::sequenceRight)
                 .map(contributors -> contributors
                         .flatMap(__ -> __)
