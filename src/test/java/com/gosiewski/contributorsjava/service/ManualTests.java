@@ -2,6 +2,7 @@ package com.gosiewski.contributorsjava.service;
 
 
 import org.assertj.vavr.api.VavrAssertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,7 @@ public class ManualTests {
     private GitHubApiService service;
 
     @Test
+    @Disabled
     void shouldReturnOrganizationReposWhenNoPagination() {
         final var result = service.getOrganizationRepos("dook");
 
@@ -32,6 +34,7 @@ public class ManualTests {
     }
 
     @Test
+    @Disabled
     void shouldReturnOrganizationReposWithPagination() {
         final var result = service.getOrganizationRepos("intive");
 
@@ -41,6 +44,7 @@ public class ManualTests {
     }
 
     @Test
+    @Disabled
     void shouldReturnRepoContributorsWhenNoPagination() {
         final var result = service.getRepoContributors("dook", "internal-tools");
 
@@ -50,6 +54,7 @@ public class ManualTests {
     }
 
     @Test
+    @Disabled
     void shouldReturnRepoContributorsWithPagination() {
         final var result = service.getRepoContributors("typelevel", "cats");
 
