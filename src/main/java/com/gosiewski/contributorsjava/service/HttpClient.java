@@ -54,7 +54,11 @@ public class HttpClient {
             // Add header to accept only particular API version responses
             final var headers = new HttpHeaders();
             headers.set(HttpHeaders.ACCEPT, GITHUB_API_V3_ACCEPT_HEADER_VALUE);
-            headers.set("Authorization", "token " + gitHubToken);
+
+            if (!gitHubToken.isEmpty()) {
+                headers.set("Authorization", "token " + gitHubToken);
+            }
+
             final var entity = new HttpEntity<>("parameters", headers);
 
             return Either.right(restTemplate.exchange(
